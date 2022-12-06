@@ -7,7 +7,6 @@ const PORT = 8000
 const baseURL = "https://madappgang.com/"
 
 let allEmails = []
-let allLinks
 
 const request = async (url) => {
 	return await axios({
@@ -21,9 +20,6 @@ const request = async (url) => {
 
 const sortEmails = () => {
 	return (allEmails = allEmails.filter((el, i, arr) => i === arr.indexOf(el)))
-}
-const sortLinks = (arr) => {
-	allLinks = allLinks.filter((val) => arr.indexOf(val) == -1)
 }
 
 const scanPage = (url) => {
@@ -41,7 +37,7 @@ const scanPage = (url) => {
 				let email = $(this).attr("href").replace("mailto:", "")
 				allEmails.push(email)
 			})
-			sortEmails()
+
 			return { links }
 		})
 	} catch (err) {
@@ -49,20 +45,12 @@ const scanPage = (url) => {
 	}
 }
 
-scanPage()
-	.then(({ links }) => {
-		console.log(allEmails)
-		allLinks = links
+scanPage().then(({ links }) => {
+	links.map((link) => {
+		scanPage(link)
 	})
-	.then(() => {
-		allLinks.map((link) =>
-			scanPage(link).then(({ links }) => {
-				sortLinks(links)
-				if (allLinks.length) allLinks.map((link) => scanPage(link))
-				return
-			})
-		)
-		return console.log(allEmails)
-	})
+	sortEmails()
+	console.log(allEmails)
+})
 
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`))
